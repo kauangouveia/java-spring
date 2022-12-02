@@ -21,6 +21,17 @@ public class Visitors {
 
     @Column(columnDefinition = "varchar(20) default 'ATIVO'")
     private String status;
+    @Column(nullable = true)
+    private String permanente;
+    public String getPermanente() {
+        return permanente;
+    }
+
+    public void setPermanente(String permanente) {
+        this.permanente = permanente;
+    }
+
+
 
     public String getStatus() {
         return status;

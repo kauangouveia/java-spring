@@ -19,36 +19,68 @@ public class VisitorCrudApplication {
 
 
 
-		
+
 		try {
 			// Instancia o ServerSocket ouvindo a porta 12345
 			ServerSocket servidor = new ServerSocket(12345);
 			System.out.println("Servidor ouvindo a porta 12345");
 			Socket cliente = servidor.accept();
-			Statement s = null;
+
 			Connection connection = ConexaoMySQL.ConexaoMySQclient("localhost:3306", "visitorapi", "root", "bcd127");
 			System.out.println("Cliente conectado: " + cliente.getInetAddress().getHostAddress());
 			String listBd;
 			String listName;
 
+			Socket clienteConnecting = new Socket("localhost",12345);
+
 
 			while(true) {
+
+
+
 				try{
-					s = (Statement) connection.createStatement();
+					new Thread(()->{
+						Statement s = null;
+						ResultSet r = null;
+						ResultSet f = null;
+						try{
+							s = (Statement) connection.createStatement();
 
-				}catch (SQLException e){
-					e.printStackTrace();
-				}
+							f = s.executeQuery("SELECT * FROM visitors");
+							s.executeUpdate("UPDATE visitors SET status = \"VENCIDO\" WHERE DATEDIFF(now(),data_de_cadastro) > 10 AND permanente != \"true\"  " );
+
+						}catch (SQLException e){
+							e.printStackTrace();
+						}
+
+					}).start();
+
+					new Thread(()->{
+						Statement s = null;
+						ResultSet r = null;
+						ResultSet f = null;
+						try{
+							s = (Statement) connection.createStatement();
+
+							f = s.executeQuery("SELECT * FROM visitors");
+							s.executeUpdate("UPDATE visitors SET status = \"ATIVO\" WHERE DATEDIFF(now(),data_de_cadastro) < 10");
+
+						}catch (SQLException e){
+							e.printStackTrace();
+						}
+
+					}).start();
 
 
-				ResultSet r = null;
-				ResultSet f = null;
-				try{
-					 s.executeUpdate("UPDATE visitors SET status = \"VENCIDO\" WHERE DATEDIFF(now(),data_de_cadastro) > 10 " );
-					s.executeUpdate("UPDATE visitors SET status = \"ATIVO\" WHERE DATEDIFF(now(),data_de_cadastro) < 10 " );
-						f = s.executeQuery("SELECT * FROM visitors");
-					System.out.println(r + "Teste xpto");
-				}catch (SQLException e){
+//					s.executeUpdate("UPDATE visitors SET status = \"ATIVO\" WHERE DATEDIFF(now(),data_de_cadastro) < 10");
+//					s.executeUpdate("UPDATE visitors SET status = \"ATIVO\" WHERE permanente = \"true\" " );
+
+
+//					System.out.println(r + "Teste xpto");
+
+
+
+				}catch (Exception e){
 					e.printStackTrace();
 				}
 				System.out.println("***************************");
